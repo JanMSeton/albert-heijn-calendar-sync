@@ -4,6 +4,9 @@ credentials.json
 client_secret.json
 token.json
 
+# Calender test quickstart
+quickstart.py
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
