@@ -1,6 +1,8 @@
 # API-Key
 
 credentials.json
+client_secret.json
+token.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
