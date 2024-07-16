@@ -3,18 +3,12 @@
 
 ## How to use
 
-- Change your settings in `webscraper/settings.yaml`
+- Change your settings in `src/settings.yaml`
     - Change the albert-heijn credentials.
-    - Change the path to your [phantomjs.exe](http://phantomjs.org/download.html). 
-    On linux, install PhantomJS by installing the following:
-        ```
-        sudo apt-install nodejs
-        sudo apt-get install nodejs-legacy
-        sudo apt-get install npm
-        sudo npm -g install phantomjs-prebuilt
-        ```
+    - Change the geckodriver path to your path.
+    
 - [Request](https://console.developers.google.com/flows/enableapi?apiid=calendar)
-a google calendar api key and store the `client_secret.json` in `webscraper/`. ([Guide on how to request a key](https://developers.google.com/google-apps/calendar/quickstart/python))
+a google calendar api key and store the `client_secret.json` in `src/`. ([Guide on how to request a key](https://developers.google.com/google-apps/calendar/quickstart/python))
 - Install the required dependencies.
 
 
@@ -37,6 +31,6 @@ a google calendar api key and store the `client_secret.json` in `webscraper/`. (
 
 ## View the browser
 
-- Change the `showbrowser` setting in `webscraper/settings.yaml` to true
+- Change the `showbrowser` setting in `src/settings.yaml` to true
 - Change `geckopath` to your [geckodriver](https://github.com/mozilla/geckodriver/releases) path.
 - Make sure you have [Firefox](https://www.mozilla.org/nl/firefox/new/) installed.
