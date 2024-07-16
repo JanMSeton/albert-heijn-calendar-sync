@@ -8,6 +8,9 @@ quickstart.py
 
 # Settings
 src/settings.yaml
+/src/settings.yaml
+settings.yaml
+*.yaml
 
 
 # Byte-compiled / optimized / DLL files
