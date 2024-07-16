@@ -66,7 +66,7 @@ class AlbertHeijn:
         
         print('Initializing web driver...')
         self.driver = webdriver.Firefox(service=service, options=options)
-        
+
         print('Logging in...')
         self.__login()
         print('Loading the schedule...')
@@ -105,3 +105,6 @@ class AlbertHeijn:
         Closes the browser window and ends the driver process.
         """
         self.driver.quit()
+
+
+    
