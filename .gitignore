@@ -1,11 +1,13 @@
 # API-Key
-
 credentials.json
 client_secret.json
 token.json
 
 # Calender test quickstart
 quickstart.py
+
+# Settings
+settings.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
