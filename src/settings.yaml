@@ -11,13 +11,8 @@ reminder: 1440
 location: Albert Heijn
 timezone: Europe/Amsterdam
 
-# Show the browser (if true set geckopath)
+# Show the browser
 showbrowser: True
 
 # Path to geckodriver.exe
 geckopath: path/to/geckodriver
-
-
-
-
-
