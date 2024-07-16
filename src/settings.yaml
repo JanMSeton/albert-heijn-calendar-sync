@@ -3,8 +3,6 @@
 username: pnl
 password: wachtwoord
 
-# Path to phantomjs.exe
-phantomjspath: path
 
 # [OPTIONAL]
 # Calendar event settings
@@ -17,4 +15,4 @@ timezone: Europe/Amsterdam
 showbrowser: True
 
 # Path to geckodriver.exe
-geckopath: /usr/local/bin/geckodriver
+geckopath: path/to/geckodriver
