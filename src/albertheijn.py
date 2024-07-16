@@ -26,15 +26,12 @@ class AlbertHeijn:
             settings = yaml.load(s, yaml.FullLoader)
         # Create a firefox driver.
         self.driver.get(LOGINPAGE)
-        # Set the username and password.
-        print(settings['username'])
-        print(settings['password'])
-        time.sleep(5)
+
+        time.sleep(6)
         self.driver.find_element(By.ID, 'uid').send_keys(settings['username'])
         self.driver.find_element(By.ID, 'password').send_keys(settings['password'])
         # Log in.
         self.driver.find_element(By.CLASS_NAME, 'submitButton').click()
-
         time.sleep(1)
 
     def __load_schedule(self):
@@ -99,6 +96,8 @@ class AlbertHeijn:
             print("Can't get the year if we're not on the schedule page. Aborting...")
             exit(3)
         return self.driver.find_element(By.CLASS_NAME, 'calYearTitle').get_attribute('innerHTML')
+
+    # TODO: Add something that gets the description from the shift, like TEAM, breaks and work description
 
     def dispose(self):
         """

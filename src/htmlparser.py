@@ -32,6 +32,7 @@ class Parser:
 
         # Convert the dates
         year = int(year)
+        # TODO: carry over to next month
         month = ["", "Jan", "Feb", "Mar", "Apr", "Mei", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"].index(month[:3])
         day = int(info[0])
         # TODO: clean this up if possible
@@ -44,7 +45,6 @@ class Parser:
         enddate = rfc.generate(self.timezone.localize(datetime(year, month, day, endhour, endmin)), utc=False)
 
         json_string = self.jsonformat.replace('_start', startdate).replace('_end', enddate)
-        print("Generated JSON String:", json_string)  # Debugging print statement
 
         try:
             return json.loads(json_string)
@@ -81,13 +81,14 @@ class Parser:
                     }
                 ]
             },
-            "colorId: "5"
+            "colorId": "_colorId"
         }'''
 
         # Replace default values with user settings.
         self.jsonformat = self.jsonformat.replace('_summary', settings['summary'])\
             .replace('_location', settings['location'])\
-            .replace('_reminder', str(settings['reminder']))
+            .replace('_reminder', str(settings['reminder']))\
+            .replace('_colorId', str(settings['colorId']))
 
         # Set the timezone.
         self.timezone = pytz.timezone(settings['timezone'])

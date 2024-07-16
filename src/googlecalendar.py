@@ -17,6 +17,7 @@ except ImportError:
 
 # If modifying these scopes, delete your previously saved credentials
 # at "C:\Users\user\.credentials\albert-heijn-calendar-sync.json"
+# TODO: add linux explanation
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'Albert Heijn Calendar Sync'
@@ -92,6 +93,7 @@ class Calendar:
             https://developers.google.com/google-apps/calendar/create-events
         """
         # Check if the event already exists.
+        # TODO: Check if this works
         if any(event['start']['dateTime'] == x['start']['dateTime'] for x in self.events):
             return
 
