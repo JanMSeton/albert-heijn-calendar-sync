@@ -9,11 +9,12 @@ phantomjspath: path
 # [OPTIONAL]
 # Calendar event settings
 summary: Werken
+reminder: Werken
 location: Albert Heijn
 timezone: Europe/Amsterdam
 
 # Show the browser (if true set geckopath)
-showbrowser: False
+showbrowser: True
 
 # Path to geckodriver.exe
-geckopath: path
+geckopath: /usr/local/bin/geckodriver

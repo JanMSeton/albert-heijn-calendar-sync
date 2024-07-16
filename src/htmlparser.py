@@ -15,7 +15,7 @@ class Parser:
         """
         info index information:
         0 = day number      e.g. 19
-        1 = start - end     e.g. (18:00 - 21:00) AH 152218:00 ~ 21:00geautoriseerd
+        1 = start - end     e.g. (18:00 - 21:00) AH 152218:00 ~ 21:00geautoriseerd
         2 = start date      e.g. 18:00
         3 = end date        e.g. 21:00
 
@@ -52,7 +52,7 @@ class Parser:
         and initializing the timezone.
         """
         with open('settings.yaml') as s:
-            settings = yaml.load(s)
+            settings = yaml.load(s, yaml.FullLoader)
 
         # Json format for google calendar.
         self.jsonformat = '{"summary":"_summary","location":"_location","description":"Event created by Stefan Pahlplatz\'s webscraper.","start":{"dateTime":"_start"},"end":{"dateTime":"_end"},"reminders":{"useDefault":"False","overrides":[{"method":"popup","minutes":_reminder}]}}'

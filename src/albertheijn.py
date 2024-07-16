@@ -2,6 +2,16 @@ import time
 import yaml
 from selenium import webdriver
 
+
+from selenium import webdriver
+from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.common.by import By
+from selenium.webdriver import Firefox
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+
+
+
+
 LOGINPAGE = "https://sam.ahold.com/pingus_jct/idp/startSSO.ping?PartnerSpId=dingprod"
 REDIRECTPAGE = "https://sam.ahold.com/wrkbrn_jct/etm/etmMenu.jsp?locale=nl_NL"
 SCHEDULEPAGE = "https://sam.ahold.com/etm/time/timesheet/etmTnsMonth.jsp"
@@ -15,17 +25,17 @@ class AlbertHeijn:
         """
         # Load the AH credentials.
         with open('settings.yaml') as s:
-            settings = yaml.load(s)
+            settings = yaml.load(s, yaml.FullLoader)
         # Create a firefox driver.
         self.driver.get(LOGINPAGE)
-        try:
-            # Set the username and password.
-            self.driver.find_element_by_id('uid').send_keys(settings['username'])
-            self.driver.find_element_by_id('password').send_keys(settings['password'])
-            # Log in.
-            self.driver.find_element_by_id('form').submit()
-        except:
-            print('Couldn\'t load the login page.')
+        # Set the username and password.
+        print(settings['username'])
+        print(settings['password'])
+        time.sleep(5)
+        self.driver.find_element(By.ID, 'uid').send_keys(settings['username'])
+        self.driver.find_element(By.ID, 'password').send_keys(settings['password'])
+        # Log in.
+        self.driver.find_element(By.CLASS_NAME, 'submitButton').click()
 
         time.sleep(1)
 
@@ -37,18 +47,26 @@ class AlbertHeijn:
         # Go to the main schedule page.
         self.driver.get(REDIRECTPAGE)
         # Click the 'Start' button.
-        self.driver.find_element_by_xpath("(//table[@class='imageButton'])[6]").click()
+        self.driver.find_element(By.XPATH, "(//table[@class='imageButton'])[6]").click()
         time.sleep(1)
 
     def __init__(self):
         """
         Initializes a web client and logs the user in.
         """
+
         with open('settings.yaml') as s:
-            settings = yaml.load(s)
+            settings = yaml.load(s, yaml.FullLoader)
+
+         # Assuming settings is a dictionary with 'geckopath' defined
+        service = Service(executable_path=settings['geckopath'])
+        options = FirefoxOptions()
+        
+
+        
         print('Initializing web driver...')
         if settings['showbrowser']:
-            self.driver = webdriver.Firefox(executable_path=settings['geckopath'])
+            self.driver = Firefox(options=options)
         else:
             if settings['phantomjspath']:
                 self.driver = webdriver.PhantomJS(executable_path=settings['phantomjspath'])
@@ -64,7 +82,7 @@ class AlbertHeijn:
         Gets all the blocks from the schedule.
         :return: All blocks in a list.
         """
-        all_elements_container = self.driver.find_elements_by_xpath("//td[@height=\"62\"][@valign=\"top\"]")
+        all_elements_container = self.driver.find_elements(By.XPATH, "//td[@height=\"62\"][@valign=\"top\"]")
         return [element.get_attribute('outerHTML') for element in all_elements_container]
 
     def get_month(self):
@@ -75,7 +93,7 @@ class AlbertHeijn:
         if self.driver.current_url != SCHEDULEPAGE:
             print("Can't get the month if we're not on the schedule page. Aborting...")
             exit(2)
-        return self.driver.find_element_by_class_name('calMonthTitle').get_attribute('innerHTML')
+        return self.driver.find_element(By.CLASS_NAME, 'calMonthTitle').get_attribute('innerHTML')
 
     def get_year(self):
         """
@@ -85,7 +103,7 @@ class AlbertHeijn:
         if self.driver.current_url != SCHEDULEPAGE:
             print("Can't get the year if we're not on the schedule page. Aborting...")
             exit(3)
-        return self.driver.find_element_by_class_name('calYearTitle').get_attribute('innerHTML')
+        return self.driver.find_element(By.CLASS_NAME, 'calYearTitle').get_attribute('innerHTML')
 
     def dispose(self):
         """
