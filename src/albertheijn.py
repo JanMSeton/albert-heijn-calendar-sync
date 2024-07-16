@@ -5,10 +5,8 @@ from selenium import webdriver
 
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
+from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
-from selenium.webdriver import Firefox
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
-
 
 
 
@@ -54,24 +52,21 @@ class AlbertHeijn:
         """
         Initializes a web client and logs the user in.
         """
-
         with open('settings.yaml') as s:
             settings = yaml.load(s, yaml.FullLoader)
 
-         # Assuming settings is a dictionary with 'geckopath' defined
-        service = Service(executable_path=settings['geckopath'])
-        options = FirefoxOptions()
-        
 
+        # Setup Firefox options
+        options = Options()
+        if not settings.get('showbrowser', True):
+            options.add_argument('--headless')
+
+        # Assuming settings is a dictionary with 'geckopath' defined
+        service = Service(executable_path=settings['geckopath'])
         
         print('Initializing web driver...')
-        if settings['showbrowser']:
-            self.driver = Firefox(options=options)
-        else:
-            if settings['phantomjspath']:
-                self.driver = webdriver.PhantomJS(executable_path=settings['phantomjspath'])
-            else:
-                self.driver = webdriver.PhantomJS()
+        self.driver = webdriver.Firefox(service=service, options=options)
+        
         print('Logging in...')
         self.__login()
         print('Loading the schedule...')

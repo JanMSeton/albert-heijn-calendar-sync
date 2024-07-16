@@ -1,15 +1,15 @@
 # [MANDATORY]
 # Albert heijn credentials
-username: pnl11t6e
-password: Borger987
+username: pnl
+password: wachtwoord
 
 # Path to phantomjs.exe
 phantomjspath: path
 
 # [OPTIONAL]
 # Calendar event settings
-summary: Werken
-reminder: Werken
+summary: Werk
+reminder: 1440
 location: Albert Heijn
 timezone: Europe/Amsterdam
 

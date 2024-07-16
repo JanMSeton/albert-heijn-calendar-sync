@@ -3,7 +3,6 @@
 from bs4 import BeautifulSoup
 import yaml
 from datetime import datetime
-import calendar
 import pyrfc3339 as rfc
 import pytz
 import json
@@ -44,7 +43,15 @@ class Parser:
         startdate = rfc.generate(self.timezone.localize(datetime(year, month, day, starthour, startmin)), utc=False)
         enddate = rfc.generate(self.timezone.localize(datetime(year, month, day, endhour, endmin)), utc=False)
 
-        return json.loads(self.jsonformat.replace('_start', startdate).replace('_end', enddate))
+        json_string = self.jsonformat.replace('_start', startdate).replace('_end', enddate)
+        print("Generated JSON String:", json_string)  # Debugging print statement
+
+        try:
+            return json.loads(json_string)
+        except json.JSONDecodeError as e:
+            print(f"JSONDecodeError: {e}")
+            print(f"Invalid JSON: {json_string}")
+            return None
 
     def __init__(self):
         """
@@ -55,7 +62,27 @@ class Parser:
             settings = yaml.load(s, yaml.FullLoader)
 
         # Json format for google calendar.
-        self.jsonformat = '{"summary":"_summary","location":"_location","description":"Event created by Stefan Pahlplatz\'s webscraper.","start":{"dateTime":"_start"},"end":{"dateTime":"_end"},"reminders":{"useDefault":"False","overrides":[{"method":"popup","minutes":_reminder}]}}'
+        self.jsonformat = '''{
+            "summary":"_summary",
+            "location":"_location",
+            "description":"Event gemaakt door albert-heijn-calender-sync",
+            "start": {
+                "dateTime":"_start"
+            },
+            "end": {
+                "dateTime":"_end"
+            },
+            "reminders": {
+                "useDefault": false,
+                "overrides":[
+                    {
+                        "method":"popup",
+                        "minutes":_reminder
+                    }
+                ]
+            },
+            "colorId: "5"
+        }'''
 
         # Replace default values with user settings.
         self.jsonformat = self.jsonformat.replace('_summary', settings['summary'])\

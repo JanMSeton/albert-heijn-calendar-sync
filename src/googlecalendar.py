@@ -82,7 +82,7 @@ class Calendar:
         self.events = events_result.get('items', [])
         
         # Filter events to only have work events.
-        self.events = [ev for ev in self.events if ev['description'] == 'Event created by Stefan Pahlplatz\'s ' +
+        self.events = [ev for ev in self.events if ev.get('description') == 'Event created by Stefan Pahlplatz\'s ' +
                        'webscraper.']
 
     def insert_event(self, event):
