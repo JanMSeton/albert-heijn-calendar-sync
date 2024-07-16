@@ -16,3 +16,8 @@ showbrowser: True
 
 # Path to geckodriver.exe
 geckopath: path/to/geckodriver
+
+
+
+
+
