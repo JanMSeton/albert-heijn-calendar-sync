@@ -7,7 +7,7 @@ token.json
 quickstart.py
 
 # Settings
-*.yaml
+/src/settings.yaml
 
 
 # Byte-compiled / optimized / DLL files
