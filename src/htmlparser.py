@@ -65,7 +65,7 @@ class Parser:
         self.jsonformat = '''{
             "summary":"_summary",
             "location":"_location",
-            "description":"Event gemaakt door albert-heijn-calender-sync",
+            "description":"_description",
             "start": {
                 "dateTime":"_start"
             },
@@ -86,6 +86,7 @@ class Parser:
 
         # Replace default values with user settings.
         self.jsonformat = self.jsonformat.replace('_summary', settings['summary'])\
+            .replace('_description', settings['description'])\
             .replace('_location', settings['location'])\
             .replace('_reminder', str(settings['reminder']))\
             .replace('_colorId', str(settings['colorId']))

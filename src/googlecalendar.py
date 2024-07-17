@@ -1,6 +1,7 @@
 import httplib2
 import os
 import datetime
+import yaml
 
 from googleapiclient import discovery
 from oauth2client import client
@@ -17,7 +18,6 @@ except ImportError:
 
 # If modifying these scopes, delete your previously saved credentials
 # at "C:\Users\user\.credentials\albert-heijn-calendar-sync.json"
-# TODO: add linux explanation
 SCOPES = 'https://www.googleapis.com/auth/calendar'
 CLIENT_SECRET_FILE = 'client_secret.json'
 APPLICATION_NAME = 'Albert Heijn Calendar Sync'
@@ -73,18 +73,25 @@ class Calendar:
         firstofmonth = datetime.datetime.today().replace(day=1).isoformat() + 'Z'  # 'Z' indicates UTC time
         lastofmonth = datetime.datetime.today().replace(month=datetime.datetime.now().month + 1, day=1).isoformat() + \
                       'Z'  # 'Z' indicates UTC time
+        
+        # Debug
+        #print(f"First of month is {firstofmonth}")
+        #print(f"Last of month is {lastofmonth}")
 
         # Get this months events.
         events_result = self.service.events().list(
-            calendarId='primary', timeMin=firstofmonth, timeMax=lastofmonth, maxResults=20, singleEvents=True,
+            calendarId='primary', timeMin=firstofmonth, timeMax=lastofmonth, maxResults=31, singleEvents=True,
             orderBy='startTime').execute()
 
         # Save the events to check for duplicates later.
         self.events = events_result.get('items', [])
         
+        # Open settings
+        with open('settings.yaml') as s:
+            settings = yaml.load(s, yaml.FullLoader)
+        
         # Filter events to only have work events.
-        self.events = [ev for ev in self.events if ev.get('description') == 'Event created by Stefan Pahlplatz\'s ' +
-                       'webscraper.']
+        self.events = [ev for ev in self.events if ev.get('description') == settings['description']]
 
     def insert_event(self, event):
         """ Inserts an event into the calendar.
@@ -92,10 +99,36 @@ class Calendar:
             :param event: JSON representation of the to be inserted event. For reference look at
             https://developers.google.com/google-apps/calendar/create-events
         """
-        # Check if the event already exists.
-        # TODO: Check if this works
-        if any(event['start']['dateTime'] == x['start']['dateTime'] for x in self.events):
-            return
+        
 
-        # Insert event.
+        # Check if the event already exists.
+        if not self.events:
+            self.events = []  # Ensure self.events is initialized
+
+        # Extract start datetime from event
+        event_start_datetime_str = event['start']['dateTime']
+        event_start_datetime = datetime.datetime.strptime(event_start_datetime_str, "%Y-%m-%dT%H:%M:%S%z")
+
+        # Debug
+        #print(f"Trying to insert event: {event['summary']} at {event_start_datetime}")
+
+        # Check if a similar event already exists
+        for existing_event in self.events:
+            existing_start_datetime_str = existing_event['start']['dateTime']
+            existing_start_datetime = datetime.datetime.strptime(existing_start_datetime_str, "%Y-%m-%dT%H:%M:%S%z")
+            
+            # Perform comparison considering timezone differences
+            if event_start_datetime == existing_start_datetime:
+                # Debug
+                #print(f"Event already exists: {event['summary']} at {event_start_datetime}")
+                return  # Event already exists, do not insert
+            #else:
+                # Debug
+                #print(f"No match: {event['summary']} at {event_start_datetime} vs {existing_event['summary']} at {existing_start_datetime}")
+
+        # Insert event if not already present
+        # Debug
+        #print(f"Inserting event: {event['summary']} at {event_start_datetime}")
+
         self.service.events().insert(calendarId='primary', body=event).execute()
+
