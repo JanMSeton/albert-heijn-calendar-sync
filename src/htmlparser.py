@@ -24,6 +24,7 @@ class Parser:
         :return: json representation of the html.
         """
         soup = BeautifulSoup(str(html), 'html.parser')
+        # Check if we have the correct block
         if not any(w in html for w in ['calendarCellRegularPast', 'calendarCellRegularFuture']):
             return None
 

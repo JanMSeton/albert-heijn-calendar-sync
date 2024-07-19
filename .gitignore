@@ -14,6 +14,12 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Test HTML
+*.html
+
+# Tests
+*.test.txt
+
 # C extensions
 *.so
 
