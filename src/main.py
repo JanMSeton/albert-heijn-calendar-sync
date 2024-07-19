@@ -14,8 +14,6 @@ def main():
     
     # Convert all blocks to json format.
     json = filter(None, [parser.block_to_json(element, ah.get_month(), ah.get_year()) for element in ah.get_schedule_blocks()])
-    #sfilename = "https___sam.ahold.com_etm_time_timesheet_etmTnsMonth.jsp.html"
-    #json = filter(None, [parser.block_to_json(element, ah.local_get_month(filename), ah.local_get_year(filename)) for element in ah.local_get_blocks(filename)])
 
     # Send new schedule week to email
     email = Email()

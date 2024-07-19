@@ -2,19 +2,13 @@ import time
 import yaml
 from selenium import webdriver
 import locale
-import datetime
-
+from datetime import datetime, timedelta
+import calendar
 
 from selenium import webdriver
 from selenium.webdriver.firefox.service import Service
 from selenium.webdriver.firefox.options import Options
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
-
-# Debug
-from bs4 import BeautifulSoup
-
-
 
 LOGINPAGE = "https://sam.ahold.com/pingus_jct/idp/startSSO.ping?PartnerSpId=dingprod"
 REDIRECTPAGE = "https://sam.ahold.com/wrkbrn_jct/etm/etmMenu.jsp?locale=nl_NL"
@@ -56,14 +50,14 @@ class AlbertHeijn:
         locale.setlocale(locale.LC_TIME, 'nl_NL.UTF-8')
 
         # Get the current date
-        current_date = datetime.datetime.now()
+        current_date = datetime.now()
 
         # Calculate the next month
         next_month = (current_date.month % 12) + 1
         next_year = current_date.year if next_month != 1 else current_date.year + 1
 
         # Create a date for the first day of the next month
-        next_month_date = datetime.datetime(next_year, next_month, 1)
+        next_month_date = datetime(next_year, next_month, 1)
 
         # Get the month name in Dutch
         next_month_name = next_month_date.strftime('%B').capitalize()
@@ -78,11 +72,11 @@ class AlbertHeijn:
         next_month_name = self.__next_month_name_dutch()
         
         # Click the button with the next month's name in Dutch
-        XPATH = "(//table[@class='imageButton'])[9]"
+        xpath = "(//table[@class='imageButton'])[9]"
 
         
         try:
-            self.driver.find_element(By.XPATH, XPATH).click()
+            self.driver.find_element(By.XPATH, xpath).click()
             # Debug
             print(f"Clicked the '{next_month_name}' button successfully.")
 
@@ -135,8 +129,37 @@ class AlbertHeijn:
         all_elements_container_next_month = self.driver.find_elements(By.XPATH, "//td[@height='62'][@valign='top']")
         # Convert elements to outer HTML for the next month
         elements_html += [element.get_attribute('outerHTML') for element in all_elements_container_next_month]
+        self.new_schedule_blocks()
         
         return elements_html
+    
+
+    def new_schedule_blocks(self):
+        """
+        Gets all the blocks from the schedule with more info
+        :return: All blocks in a list
+        """
+
+        # Get the current year and month
+        now = datetime.now()
+    
+        # Determine the first day of the next month
+        next_month = now.month % 12 + 1
+        next_month_year = now.year if next_month > 1 else now.year + 1
+        first_day_next_month = datetime(next_month_year, next_month, 1)
+        
+        # Loop from the current date to the end of the current month
+        current_date = now
+        while current_date < first_day_next_month:
+            # Format the date as dd:mm:yyyy
+            formatted_date = current_date.strftime('%d.%m.%Y')
+            
+
+            path = f"https://sam.ahold.com//etm/time/timesheet/etmTnsDetail.jsp?date={formatted_date}"
+            self.driver.get(path)
+
+            # Move to the next day
+            current_date += timedelta(days=1)
 
 
     def get_month(self):
@@ -171,64 +194,6 @@ class AlbertHeijn:
         if self.mode != 'default':
             return
         self.driver.quit()
-
-
-
-    # Debug TODO: Fix this
-
-    def _get_soup(self, filename):
-        """
-        Reads the HTML file and parses it with BeautifulSoup.
-        :return: BeautifulSoup object containing the parsed HTML.
-        """
-        with open(filename, 'r', encoding='utf-8') as file:
-            html_content = file.read()
-        return BeautifulSoup(html_content, 'html.parser')
-
-    def local_get_blocks(self, filename):
-        """
-        Gets all the blocks from an HTML file.
-        :param filename: Name of the HTML file in the same directory.
-        :return: All blocks in a list.
-        """
-        # Read the HTML file
-        with open(filename, 'r', encoding='utf-8') as file:
-            html_content = file.read()
-
-        # Parse the HTML content
-        soup = BeautifulSoup(html_content, 'html.parser')
-
-        # Find all elements matching the criteria
-        all_elements = soup.find_all('td', attrs={'height': '62', 'valign': 'top'})
-
-        # Return the outer HTML of each element
-        return [str(element) for element in all_elements]
-
-    def local_get_month(self, filename):
-        """
-        Gets the month the schedule is displaying from the HTML file.
-        :return: The month as a string.
-        """
-        soup = self._get_soup(filename)
-        month_element = soup.find(class_='calMonthTitle')
-        if month_element:
-            return month_element.get_text(strip=True)
-        else:
-            print("Month element not found. Aborting...")
-            return None
-
-    def local_get_year(self, filename):
-        """
-        Gets the year the schedule is displaying from the HTML file.
-        :return: The year as a string.
-        """
-        soup = self._get_soup(filename)
-        year_element = soup.find(class_='calYearTitle')
-        if year_element:
-            return year_element.get_text(strip=True)
-        else:
-            print("Year element not found. Aborting...")
-            return None
 
 
     

@@ -10,7 +10,7 @@ import json
 
 class Parser:
 
-    def block_to_json(self, html, month, year):
+    def block_to_json(self, html, month, year, description = "WERK"):
         """
         info index information:
         0 = day number      e.g. 19
@@ -45,7 +45,7 @@ class Parser:
         startdate = rfc.generate(self.timezone.localize(datetime(year, month, day, starthour, startmin)), utc=False)
         enddate = rfc.generate(self.timezone.localize(datetime(year, month, day, endhour, endmin)), utc=False)
 
-        json_string = self.jsonformat.replace('_start', startdate).replace('_end', enddate)
+        json_string = self.jsonformat.replace('_start', startdate).replace('_end', enddate).replace('_end', description)
 
         try:
             return json.loads(json_string)
@@ -87,7 +87,6 @@ class Parser:
 
         # Replace default values with user settings.
         self.jsonformat = self.jsonformat.replace('_summary', settings['summary'])\
-            .replace('_description', settings['description'])\
             .replace('_location', settings['location'])\
             .replace('_reminder', str(settings['reminder']))\
             .replace('_colorId', str(settings['colorId']))
