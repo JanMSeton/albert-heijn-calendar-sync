@@ -9,6 +9,8 @@ from oauth2client import tools
 from oauth2client.file import Storage
 from oauth2client import clientsecrets
 
+from typing import Any
+
 try:
     import argparse
 
@@ -25,7 +27,7 @@ APPLICATION_NAME = 'Albert Heijn Calendar Sync'
 
 class Calendar:
     @staticmethod
-    def get_credentials():
+    def get_credentials() -> Any:
         """Gets valid user credentials from storage.
     
         If nothing has been stored, or if the stored credentials are invalid,
@@ -59,7 +61,7 @@ class Calendar:
             print('Storing credentials to ' + credential_path)
         return credentials
 
-    def __init__(self):
+    def __init__(self) -> None:
         """ Initializes the calendar by authenticating.
 
             Creates a Google Calendar API service object.
@@ -93,13 +95,12 @@ class Calendar:
         # Filter events to only have work events.
         self.events = [ev for ev in self.events if ev.get('description') == settings['description']]
 
-    def insert_event(self, event):
+    def insert_event(self, event: dict[str, Any]) -> None:
         """ Inserts an event into the calendar.
         
             :param event: JSON representation of the to be inserted event. For reference look at
             https://developers.google.com/google-apps/calendar/create-events
         """
-        
 
         # Check if the event already exists.
         if not self.events:
@@ -110,7 +111,7 @@ class Calendar:
         event_start_datetime = datetime.datetime.strptime(event_start_datetime_str, "%Y-%m-%dT%H:%M:%S%z")
 
         # Debug
-        #print(f"Trying to insert event: {event['summary']} at {event_start_datetime}")
+        print(f"Trying to insert event: {event['summary']} at {event_start_datetime}")
 
         # Check if a similar event already exists
         for existing_event in self.events:
@@ -120,15 +121,17 @@ class Calendar:
             # Perform comparison considering timezone differences
             if event_start_datetime == existing_start_datetime:
                 # Debug
-                #print(f"Event already exists: {event['summary']} at {event_start_datetime}")
+                print(f"Event already exists: {event['summary']} at {event_start_datetime}")
                 return  # Event already exists, do not insert
             #else:
                 # Debug
-                #print(f"No match: {event['summary']} at {event_start_datetime} vs {existing_event['summary']} at {existing_start_datetime}")
+                print(f"No match: {event['summary']} at {event_start_datetime} vs {existing_event['summary']} at {existing_start_datetime}")
 
         # Insert event if not already present
         # Debug
-        #print(f"Inserting event: {event['summary']} at {event_start_datetime}")
+        print(f"Inserting event: {event['summary']} at {event_start_datetime}")
 
         self.service.events().insert(calendarId='primary', body=event).execute()
+
+        # TODO: update when schedule has changed
 
