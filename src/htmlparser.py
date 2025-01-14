@@ -11,13 +11,13 @@ from typing import Optional, Any, Generator
 VALIDWORKSTRINGS = {"Meeruren", "Gewerkte uren", "Betaalde pauze", "Onbetaalde pauze"}
 WORKCODENAMEDICT = {
     "AGF": "AGF",
-    "": "Werk",
+    "": "EMPTY",
     "CODG": "Codeboek gekoeld",
     "BRK-PD": "Betaalde pauze",
     "BRK-U/PD": "Onbetaalde pauze",
     "NAVU": "Navulling",
     "LA-LO": "Laden en lossen",
-    "01": "Werk",
+    "01": "Onbekend",
     "BAK": "Bakken",
     "OPZET": "Opzetten"
 }
@@ -33,18 +33,30 @@ class Parser:
     def pre_parse_table_by_team(self, table_html: str, day_html: str, year: str) -> Generator[dict[str, Any], None, None]:
         """
         Pre-process the HTML table to split by team and return JSON objects for each team if no "pauze" in description.
+        :param table_html: the html table to be parsed
+        :param day_html": forwarded day_html
+        :param year: year
+        :returns: A generator generating JSON objects for every team
+
+
+        HTML --->  Vers_rows -----> team_table_to_json ---> return
+             \--> Operatie_rows --> team_table_to_json ---> return
+
         """
+        #print("Preparsing...")
         soup = BeautifulSoup(str(table_html), 'html.parser')
         table = soup.find('table')
-        if table is None:
-            # Log or handle the error if the table is not found
-            print("Error: No table found in the provided HTML in the pre-parser.")
-            return None 
-    
-        rows: list[list[str]] = [[col.get_text(strip=True) for col in row.find_all('td')]
-                 for row in table.find_all('tr')[1:]]
-        if not rows:
-            print("No rows found in the table")
+        try:
+            if table is None:
+                raise ValueError("Error: No table found in the provided HTML in the pre-parser.")
+        
+            rows: list[list[str]] = [[col.get_text(strip=True) for col in row.find_all('td')]
+                    for row in table.find_all('tr')[1:]]
+            if not rows:
+                print("No rows found in the table")
+                raise ValueError("No rows found in the table.")
+        except ValueError as e:
+            print(e)
             return None
 
         current_team = ""
@@ -62,7 +74,7 @@ class Parser:
                     if current_team:
                     # Process and store data for the previous team if it has valid rows
                         # Debug: Print team_rows for the previous team
-                        print(f"Yielding data for team {current_team}: {team_rows.get(current_team, [])}")
+                        #print(f"Yielding data for team {current_team}: {team_rows.get(current_team, [])}")
                         yield self.team_table_to_json(team_rows.get(current_team, []), day_html, year)
 
                     # Initialize new team
@@ -76,22 +88,34 @@ class Parser:
         # Handle the last team
         if current_team:
             # Debug: Print team_rows for the previous team
-            print(f"Yielding data for team {current_team}: {team_rows.get(current_team, [])}")
+            #print(f"Yielding data for team {current_team}: {team_rows.get(current_team, [])}")
             yield self.team_table_to_json(team_rows.get(current_team, []), day_html, year)
 
 
-    def team_table_to_json(self, rows: list[list[str]], day_html: str, year: str) -> Optional[dict[str, Any]]:
+    def team_table_to_json(self, rows_per_team: list[list[str]], day_html: str, year: str) -> Optional[dict[str, Any]]:
+        """
+        Convert rows_per_team obtained from the pre-parser to JSON
+        :param rorows_per_teamws: A list of all the table rows per team
+        :param day_html: Html part containing day and month
+        :param year: year
+        :returns: The table formatted to JSON
+        """
+        #print("Parsing teams...")
+        with open('settings.yaml') as s:
+            settings = yaml.load(s, yaml.FullLoader)
+        try:
 
-        if not rows:
-            print("No rows found")
-            return None
-        else:
-            # Debug: Print rows to verify data
-            print(f"Processing rows at start: {rows}")
+            if not rows_per_team:
+                raise ValueError("Error: No rows found")
+        except ValueError as e:
+            print(e)
 
+        # Debug: Print rows to verify data
+        #print(f"Processing rows at start: {rows_per_team}")
 
+        # Debug
         with open("tabletest.html", 'a') as file:
-            file.write("Day html:" + str(day_html) + "\n" +str(rows) + "\n")
+            file.write("Day html:" + str(day_html) + "\n" +str(rows_per_team) + "\n")
         
         year = int(year)
 
@@ -114,7 +138,7 @@ class Parser:
         latest_end = None
         contains_shift = False
 
-        for row in rows:
+        for row in rows_per_team:
             contains_shift = False
             if len(row) < 8:
                 continue  # Skip incomplete rows
@@ -129,8 +153,8 @@ class Parser:
             # Check if the description contains "Toeslaguren 50" or "Toeslaguren 100"
             if description not in VALIDWORKSTRINGS:
                 continue  # Skip this row
-
             contains_shift = True
+
             # Create the start and end datetime objects
             start_hour, start_minute = map(int, start_time.split(":"))
             end_hour, end_minute = map(int, end_time.split(":"))
@@ -159,7 +183,7 @@ class Parser:
 
             description_str += f"Team: {TEAMCODEDICT.get(team, team)}, Activiteit: {WORKCODENAMEDICT.get(activity, activity)}\n"
 
-        if not contains_shift: return None # The page did not conatains a shit, only for example an Absence message
+        if not contains_shift: return None # The page did not conatains a shift, only for example an Absence message
 
         # Generate RFC-3339 dates
         # TODO: clean this up if possible
@@ -169,14 +193,15 @@ class Parser:
         pauze_onbetaald_str = self._timedelta_to_str(pauze_onbetaald)
         pauze_betaald_str = self._timedelta_to_str(pauze_betaald)
 
-        description_str += f"Pauze (Onbetaald): {pauze_onbetaald_str}, Pauze (Betaald): {pauze_betaald_str}\n Event gemaakt door albert-heijn-calender-sync"
+        description_str += f"Pauze (Onbetaald): {pauze_onbetaald_str}, Pauze (Betaald): {pauze_betaald_str}\n {settings['description']} op {datetime.now(self.timezone)}"
         description_str = description_str.replace('\n', '\\n') # Fixes JSON
 
         # Replace placeholders in your JSON format string (assumed)
         json_string = self.jsonformat.replace('_start', earliest_start_str).replace('_end', latest_end_str).replace('_description', description_str)
 
         try:
-            print(f"json_string : {json_string}")
+            # Debug
+            #print(f"json_string : {json_string}")
             return json.loads(json_string)
         except json.JSONDecodeError as e:
             print(f"JSONDecodeError: {e}")
@@ -184,10 +209,13 @@ class Parser:
             return None
 
     def _timedelta_to_str(self, td: timedelta) -> str:
-        """Convert a timedelta object to a string in 'H:M:S' format."""
+        """
+        Convert a timedelta object to a string in 'H:M:S' format.
+        :param td: The timedelta object
+        """
         total_seconds = int(td.total_seconds())
         hours, remainder = divmod(total_seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
+        minutes, _ = divmod(remainder, 60)
         return f"{hours}:{minutes:02}"
         
 

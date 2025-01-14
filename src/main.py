@@ -11,34 +11,36 @@ def main():
     parser = Parser()
 
     
-    with open("tabletest.html", 'w') as file: # empty file
+    with open("tabletest.html", 'w') as file: # empty the file
         pass
 
-    json = (
+    json = [
         result
         for block in ah.get_table_list()
         for result in parser.pre_parse_table_by_team(block['table_html'], block['date_html'], ah.get_year())
         if result is not None
-    )
+    ]
 
 
 
-    # Convert all blocks to json format.
-    #json = filter(None, [parser.block_to_json(element, ah.get_month(), ah.get_year()) for element in ah.get_schedule_blocks()])
-    # ah.dispose()
     # Send new schedule week to email
-    email = Email()
-    email.send_email(json)
+    # email = Email()
+    # email.send_email(*email.two_weeks_from_now, json)
     ah.dispose()
 
-    # calendar = Calendar()
-    # print('Updating calendar...')
-    # for event in json:
-    #     calendar.insert_event(event)
+    calendar = Calendar()
+    changed_events = []
+    print('Updating calendar...')
+    for event in json:
+        if calendar.insert_event(event):
+            changed_events.append(event)
 
-    # ah.dispose()
+    # send changed schedule weeks to email
+    # email.send_changed_weeks_email(changed_events, json)
+
+    ah.dispose()
     
-    # print('Done')
+    print('Done')
 
 if __name__ == "__main__":
     main()
